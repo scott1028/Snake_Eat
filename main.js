@@ -14,6 +14,8 @@ $(document).ready(function(){
 		left: 0,
 		top: 0,
 		backgroundColor: 'grey',
+	}).attr({
+		id:'snake'
 	});
 
 	// 蛇的常規行為
