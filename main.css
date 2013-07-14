@@ -1,0 +1,9 @@
+body > div {
+	width: 200px;
+	height: 200px;
+	background-color: lightgreen;
+	opacity: 0.3;
+	font-size: 20pt;
+	padding: 0px;
+	margin: 0px;
+};
