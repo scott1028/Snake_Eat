@@ -1,9 +1,9 @@
-var main;
 $(document).ready(function(){
 	// 場景
 	createWorld=function(world_handles){
 		world_handles = world_handles || [];
 		var ta=$('<table></table>').css({border:'5px ridge #303030',backgroundColor:'lightgreen',borderCollpase:'collpase',transform:'perspective(600px) rotateX(45deg)',marginLeft:'auto',marginRight:'auto'});
+		//var ta=$('<table></table>').css({border:'5px ridge #303030',backgroundColor:'lightgreen',borderCollpase:'collpase',marginLeft:'auto',marginRight:'auto'});
 		var tr=$('<tr></tr>').css({margin:0,padding:0,borderWidth:0,border:'none'});
 		var td=$('<td></td>').css({width:30,height:30,display:'inline-block',margin:0,padding:0,borderWidth:0});
 
@@ -28,19 +28,21 @@ $(document).ready(function(){
 
 	// 蛇
 	snake=function(world){
-		var start_pos=[12,14];
+		var start_body=[[12,14],[11,14],[10,14],[9,14],[8,14],[7,14]];
 		var start_len=1;
 		var default_dir=['x','+'];
 		var this_snake=this;	// 要做好 handle
 		this.len=start_len;
-		this.body_=[start_pos];
+		this.body_=start_body;
 		this.dir=default_dir;
 
 		// 畫面更新的時候要 call
 		this_snake.draw_to_scene=function(){
 			ta.find('td:not([who=food])').css({backgroundColor:'transparent'});
 			for(var i in this_snake.body_){
-				ta.find('td:not([who=food])[x='+this_snake.body_[i][0]+'][y='+this_snake.body_[i][1]+']').css({backgroundColor:'#303030'})
+				if(this_snake.body_[i][0]!=undefined && this_snake.body_[i][1]!=undefined){	// 排除虛增的身體長度
+					ta.find('td:not([who=food])[x='+this_snake.body_[i][0]+'][y='+this_snake.body_[i][1]+']').css({backgroundColor:'#303030'});
+				}
 			}
 		}
 
@@ -49,26 +51,34 @@ $(document).ready(function(){
 
 			var pos_last=$(this_snake.body_);
 
+			var head=$(this_snake.body_[0]);  		// 複製蛇頭坐標,因為 Array 的指向會是參考所以要用複製的
+			var tail=this_snake.body_.pop();		// 拿掉尾巴坐標
+
 			switch(this_snake.dir.toString()){
 				case 'x,+':
-					(this_snake.body_[0][0]+1<=ta.max_x) ? this_snake.body_[0][0]+=1 : this_snake.dir=['y','+'];
+					(head[0]+1<=ta.max_x) ? head[0]+=1 : this_snake.dir=['y','+'];
 					break;
 				case 'x,-':
-					(this_snake.body_[0][0]-1>=ta.min_x) ? this_snake.body_[0][0]-=1 : this_snake.dir=['y','-'];
+					(head[0]-1>=ta.min_x) ? head[0]-=1 : this_snake.dir=['y','-'];
 					break;
 				case 'y,+':
-					(this_snake.body_[0][1]+1<=ta.max_y) ? this_snake.body_[0][1]+=1 : this_snake.dir=['x','-'];
+					(head[1]+1<=ta.max_y) ? head[1]+=1 : this_snake.dir=['x','-'];
 					break;
 				case 'y,-':
-					(this_snake.body_[0][1]-1>=ta.min_y) ? this_snake.body_[0][1]-=1 : this_snake.dir=['x','+'];
+					(head[1]-1>=ta.min_y) ? head[1]-=1 : this_snake.dir=['x','+'];
 					break;
 			}
 
+			// 把新的蛇頭接上
+			this_snake.body_.unshift(head);			//this_snake.body_.forEach(function(r,i,s){console.log(r,i,s)});
+
+			// update screen
 			this_snake.draw_to_scene();
 
 			// do world handle
-			for(var i in world.do_somethings){world.do_somethings[i]();}
-			setTimeout(this_snake.always_do, 80); // timer 的 this 不是 snake
+			for(var i in world.do_somethings){
+				world.do_somethings[i]();
+			}
 		}
 
 		this_snake.setup_keyboard_event=function(){
@@ -101,7 +111,7 @@ $(document).ready(function(){
 
 		// 畫面更新的時候要 call
 		food.draw_to_scene=function(){
-			ta.find('td[who=food]').css({backgroundColor:'transparent'});
+			ta.find('td[who=food]').css({backgroundColor:'transparent'}).attr({who:''});
 			ta.find('td[x='+food.pos[0]+'][y='+food.pos[1]+']').css({backgroundColor:'red'}).attr({who:'food'});
 		};
 
@@ -118,23 +128,25 @@ $(document).ready(function(){
 	// create world
 	ta=createWorld([
 		function(){
-			if(second && second.pos.toString()==main.body_[0].toString()){
+			if(second && second.pos.toString()==main.body_[0].toArray().toString()){
 				second.randomize_pos();
 				score+=1;
 				ta.find('td[x=0][y=24]').text(score);
+				main.body_.push([undefined,undefined]); // 畫圖的時候只要排除 [undefine,undefined] 即可！
 			};
-
-			second ? console.log(second.pos.toString()==main.body_[0].toString()) : undefined;
 		}
 	]);
-
+	
 	// create player, into the ta of world
 	main=new snake(ta);
 	main.draw_to_scene();
-	main.always_do();
+	//setTimeout(main.always_do,100);
+	setInterval(main.always_do,100);
 	main.setup_keyboard_event();
 
 	// create food
 	second=new food;
 	second.draw_to_scene();
+	a=main;
+	
 });
