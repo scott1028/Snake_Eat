@@ -72,13 +72,22 @@ $(document).ready(function(){
 			// 把新的蛇頭接上
 			this_snake.body_.unshift(head);			//this_snake.body_.forEach(function(r,i,s){console.log(r,i,s)});
 
+			var c=0;
+			for(var i=0;i<this_snake.body_.length;i++){
+				if(this_snake.body_[i][0]==head[0] && this_snake.body_[i][1]==head[1]){
+					c+=1;
+				};
+
+				if(c>=2){console.log('Game Over!');};
+			};
+
 			// update screen
 			this_snake.draw_to_scene();
 
 			// do world handle
 			for(var i in world.do_somethings){
 				world.do_somethings[i]();
-			}
+			};
 		}
 
 		this_snake.setup_keyboard_event=function(){
@@ -117,7 +126,16 @@ $(document).ready(function(){
 
 		// 隨機位置
 		food.randomize_pos=function(){
-			food.pos=[Math.round(Math.random()*24),Math.round(Math.random()*24)];
+			food.pos=[Math.round(Math.random()*ta.max_x),Math.round(Math.random()*ta.max_y)];
+
+			//console.log(food.pos);
+
+			for(var i=0;i<main.body_.length;i++){
+				if(main.body_[i][0]==food.pos[0] && main.body_[i][1]==food.pos[1]){
+					food.randomize_pos();
+				}
+			};
+
 			food.draw_to_scene();
 		};
 	};
@@ -131,7 +149,7 @@ $(document).ready(function(){
 			if(second && second.pos.toString()==main.body_[0].toArray().toString()){
 				second.randomize_pos();
 				score+=1;
-				ta.find('td[x=0][y=24]').text(score);
+				ta.find('td[x=0][y='+ta.max_y+']').text(score);
 				main.body_.push([undefined,undefined]); // 畫圖的時候只要排除 [undefine,undefined] 即可！
 			};
 		}
