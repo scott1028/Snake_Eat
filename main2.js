@@ -54,19 +54,20 @@ $(document).ready(function(){
 			var head=$(this_snake.body_[0]);  		// 複製蛇頭坐標,因為 Array 的指向會是參考所以要用複製的
 			var tail=this_snake.body_.pop();		// 拿掉尾巴坐標
 
-			switch(this_snake.dir.toString()){
-				case 'x,+':
-					(head[0]+1<=ta.max_x) ? head[0]+=1 : this_snake.dir=['y','+'];
-					break;
-				case 'x,-':
-					(head[0]-1>=ta.min_x) ? head[0]-=1 : this_snake.dir=['y','-'];
-					break;
-				case 'y,+':
-					(head[1]+1<=ta.max_y) ? head[1]+=1 : this_snake.dir=['x','-'];
-					break;
-				case 'y,-':
-					(head[1]-1>=ta.min_y) ? head[1]-=1 : this_snake.dir=['x','+'];
-					break;
+			// 如果撞牆了該怎麼重新計算位置
+			while(true){
+				if(this_snake.dir.toString()=='x,+'){
+					if(head[0]+1<=ta.max_x){head[0]+=1;break;}else{this_snake.dir=['y','+'];}
+				}
+				if(this_snake.dir.toString()=='x,-'){
+					if(head[0]-1>=ta.min_x){head[0]-=1;break;}else{this_snake.dir=['y','-'];}
+				}
+				if(this_snake.dir.toString()=='y,+'){
+					if(head[1]+1<=ta.max_y){head[1]+=1;break;}else{this_snake.dir=['x','-'];}
+				}
+				if(this_snake.dir.toString()=='y,-'){
+					if(head[1]-1>=ta.min_y){head[1]-=1;break;}else{this_snake.dir=['x','+'];}
+				}
 			}
 
 			// 把新的蛇頭接上
@@ -78,7 +79,7 @@ $(document).ready(function(){
 					c+=1;
 				};
 
-				if(c>=2){console.log('Game Over!');};
+				if(c>=2){console.log('Game Over!');clearInterval(timeline);break;};
 			};
 
 			// update screen
@@ -141,7 +142,7 @@ $(document).ready(function(){
 	};
 
 
-	var second,main,score;
+	var second,main,score,timeline;
 	score=0
 	// create world
 	ta=createWorld([
@@ -159,7 +160,7 @@ $(document).ready(function(){
 	main=new snake(ta);
 	main.draw_to_scene();
 	//setTimeout(main.always_do,100);
-	setInterval(main.always_do,100);
+	timeline=setInterval(main.always_do,100);
 	main.setup_keyboard_event();
 
 	// create food
